@@ -15,7 +15,7 @@
       const code   = params.get('code');
       const state  = params.get('state');
       if (code) {
-        fetch('https://longevitydev-bbffeufsfpaegab8.francecentral-01.azurewebsites.net/oauth/exchange', {
+        fetch('http://localhost:5000/auth/callback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code, state })
