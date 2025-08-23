@@ -10,33 +10,29 @@
   <p>You can now close this page and return to LongevityX.</p>
 
   <script>
-    (function () {
+(function () {
     const params = new URLSearchParams(window.location.search);
-    const code   = params.get('code');
-    const state  = params.get('state');
-    const sig    = params.get('sig');    // ← Get signature
-    const ts     = params.get('ts');     // ← Get timestamp
+    const code = params.get('code');
+    const encoded_state = params.get('state');  // Get the packed state
     
     if (code) {
         fetch('http://localhost:5000/auth/callback', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-                code: code, 
-                state: state,
-                sig: sig,     // ← Send signature
-                ts: ts        // ← Send timestamp
+                code: code,
+                state: encoded_state  // Send the encoded state blob
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.close(); // Close popup when successful
+                window.close();
             }
         })
         .catch(console.error);
     }
 })();
-  </script>
+</script>
 </body>
 </html>
