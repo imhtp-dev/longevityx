@@ -11,17 +11,32 @@
 
   <script>
     (function () {
-      const params = new URLSearchParams(window.location.search);
-      const code   = params.get('code');
-      const state  = params.get('state');
-      if (code) {
+    const params = new URLSearchParams(window.location.search);
+    const code   = params.get('code');
+    const state  = params.get('state');
+    const sig    = params.get('sig');    // ← Get signature
+    const ts     = params.get('ts');     // ← Get timestamp
+    
+    if (code) {
         fetch('http://localhost:5000/auth/callback', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code, state })
-        }).catch(console.error);
-      }
-    })();
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                code: code, 
+                state: state,
+                sig: sig,     // ← Send signature
+                ts: ts        // ← Send timestamp
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.close(); // Close popup when successful
+            }
+        })
+        .catch(console.error);
+    }
+})();
   </script>
 </body>
 </html>
