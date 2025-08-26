@@ -13,24 +13,39 @@
 (function () {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
-    const encoded_state = params.get('state');  // Get the packed state
+    const encoded_state = params.get('state');
     
-    if (code) {
+    if (code && encoded_state) {
         fetch('http://localhost:5000/auth/callback', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 code: code,
-                state: encoded_state  // Send the encoded state blob
+                state: encoded_state
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'auth_success', 
+                        user_id: data.user_id
+                    }, '*');
+                }
                 window.close();
+            } else {
+                console.error('Auth callback failed:', data.error);
+                document.body.innerHTML = `<p>Authentication failed: ${data.error}</p>`;
             }
         })
-        .catch(console.error);
+        .catch(error => {
+            console.error('Network error:', error);
+            document.body.innerHTML = '<p>Network error during authentication</p>';
+        });
+    } else {
+        console.error('Missing code or state parameter');
+        document.body.innerHTML = '<p>Invalid authentication response</p>';
     }
 })();
 </script>
