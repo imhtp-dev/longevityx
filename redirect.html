@@ -11,35 +11,40 @@
 
   <script>
 (function () {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    const encoded_state = params.get('state');
-    
-    if (code && encoded_state) {
-        fetch('http://localhost:5000/auth/callback', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                code: code,
-                state: encoded_state
-            })
+   const params = new URLSearchParams(window.location.search);
+const code = params.get('code');
+const encoded_state = params.get('state');
+
+if (code && encoded_state) {
+    fetch('http://localhost:5000/auth/callback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            code: code,
+            state: encoded_state
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                if (window.opener) {
-                    window.opener.postMessage({
-                        type: 'auth_success', 
-                        user_id: data.user_id
-                    }, '*');
-                }
-                window.close();
-            } else {
-                console.error('Auth callback failed:', data.error);
-                document.body.innerHTML = `<p>Authentication failed: ${data.error}</p>`;
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (window.opener) {
+                window.opener.postMessage({
+                    type: 'auth_success', 
+                    user_id: data.user_id,
+                    whoop_id: data.whoop_id 
+                }, '*');
             }
-        })
-        .catch(error => {
+            window.close();
+        } else {
+            if (window.opener) {
+                window.opener.postMessage({
+                    type: 'auth_error', 
+                    error: data.error || 'Authentication failed'
+                }, '*');
+            }
+            window.close();
+        }
+    }).catch(error => {
             console.error('Network error:', error);
             document.body.innerHTML = '<p>Network error during authentication</p>';
         });
