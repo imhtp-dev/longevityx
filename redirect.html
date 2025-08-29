@@ -16,7 +16,7 @@ const code = params.get('code');
 const encoded_state = params.get('state');
 
 if (code && encoded_state) {
-    fetch('http://localhost:5000/auth/callback', {
+    fetch('http://localhost:8500/auth/callback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
